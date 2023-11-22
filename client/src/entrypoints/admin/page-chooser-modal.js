@@ -96,6 +96,11 @@ const PAGE_CHOOSER_MODAL_ONLOAD_HANDLERS = {
         modal.loadUrl(this.href);
         return false;
       });
+
+      updateMultipleChoiceSubmitEnabledState();
+      $('[data-multiple-choice-select]', modal.body).on('change', () => {
+        updateMultipleChoiceSubmitEnabledState();
+      });
     }
 
     function updateMultipleChoiceSubmitEnabledState() {
