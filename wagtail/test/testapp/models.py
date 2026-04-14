@@ -2040,6 +2040,12 @@ class BlogCategoryBlogPage(models.Model):
     ]
 
 
+class ManyToManyBlogPageTag(TaggedItemBase):
+    content_object = ParentalKey(
+        "ManyToManyBlogPage", on_delete=models.CASCADE, related_name="tagged_items"
+    )
+
+
 class ManyToManyBlogPage(Page):
     """
     A page type with two different kinds of M2M relation.
@@ -2052,10 +2058,17 @@ class ManyToManyBlogPage(Page):
     blog_categories = models.ManyToManyField(
         BlogCategory, through=BlogCategoryBlogPage, blank=True
     )
+    tags = ClusterTaggableManager(through=ManyToManyBlogPageTag, blank=True)
 
+    content_panels = Page.content_panels + [
+        FieldPanel("adverts"),
+    ]
     # make first_published_at editable on this page model
     settings_panels = Page.settings_panels + [
         FieldPanel("first_published_at"),
+    ]
+    promote_panels = Page.promote_panels + [
+        FieldPanel("tags"),
     ]
 
 

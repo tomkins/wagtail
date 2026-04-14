@@ -313,6 +313,7 @@ class CreateView(
 
         # Save page
         self.parent_page.add_child(instance=self.page)
+        self.form.save_m2m()
 
         # Set page privacy setting
         self.set_default_privacy_setting()

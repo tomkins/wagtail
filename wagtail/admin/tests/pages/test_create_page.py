@@ -23,6 +23,7 @@ from wagtail.test.testapp.models import (
     BusinessIndex,
     BusinessSubIndex,
     DefaultStreamPage,
+    ManyToManyBlogPage,
     PersonPage,
     SimpleChildPage,
     SimplePage,
@@ -2397,6 +2398,29 @@ class TestPageCreation(WagtailTestUtils, TestCase):
             usage_section.get_text(separator="\n", strip=True),
             "Usage\nReferenced 0 times",
         )
+
+    def test_create_page_with_manytomanyfield(self):
+        # Not formally supported (use a ParentalManyToManyField instead!), but should still work
+        advert = Advert.objects.create(text="An advert")
+        post_data = {
+            "title": "Testing ManyToManyField",
+            "slug": "testing-manytomanyfield",
+            "adverts": advert.id,
+            "action-publish": "Publish",
+        }
+        response = self.client.post(
+            reverse(
+                "wagtailadmin_pages:add",
+                args=("tests", "manytomanyblogpage", self.root_page.id),
+            ),
+            post_data,
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response, reverse("wagtailadmin_explore", args=(self.root_page.id,))
+        )
+        page = ManyToManyBlogPage.objects.get()
+        self.assertQuerySetEqual(page.adverts.all(), [advert])
 
 
 class TestPermissionedFieldPanels(WagtailTestUtils, TestCase):
