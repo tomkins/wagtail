@@ -285,9 +285,15 @@ class AdminPageChooser(BaseChooser):
         }
 
     def get_instance(self, value):
-        instance = super().get_instance(value)
-        if instance:
-            return instance.specific
+        if value is None:
+            return None
+        elif isinstance(value, self.model_class):
+            return value
+        else:  # assume instance ID
+            try:
+                return self.model_class.objects.specific().defer_streamfields().get(pk=value)
+            except self.model_class.DoesNotExist:
+                return None
 
     def get_display_title(self, instance):
         return instance.get_admin_display_title()

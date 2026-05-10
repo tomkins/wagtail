@@ -233,17 +233,19 @@ class ExternalLinkElementHandler(LinkElementHandler):
 class PageLinkElementHandler(LinkElementHandler):
     def get_attribute_data(self, attrs):
         try:
-            page = Page.objects.get(id=attrs["id"]).specific
+            page = Page.objects.specific().defer_streamfields().get(id=attrs["id"])
         except Page.DoesNotExist:
             # retain ID so that it's still identified as a page link (albeit a broken one)
             return {"id": int(attrs["id"]), "url": None, "parentId": None}
 
-        parent_page = page.get_parent()
+        parent_page_id = Page.objects.filter(
+            path=Page._get_parent_path_from_path(page.path)
+        ).values_list("id", flat=True)
 
         return {
             "id": page.id,
             "url": page.url,
-            "parentId": parent_page.id if parent_page else None,
+            "parentId": parent_page_id[0] if parent_page_id else None,
         }
 
 
